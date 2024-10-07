@@ -1,18 +1,17 @@
 ﻿using System;
-using SQLite;
 
 namespace Hangfire.Storage.SQLite
 {
     public class SQLiteDbConnectionFactory
     {
-        private readonly Func<SQLiteConnection> _getConnection;
+        private readonly Func<HfSqliteConnection> _getConnection;
 
-        public SQLiteDbConnectionFactory(Func<SQLiteConnection> getConnection)
+        public SQLiteDbConnectionFactory(Func<HfSqliteConnection> getConnection)
         {
             _getConnection = getConnection;
         }
 
-        public SQLiteConnection Create()
+        public HfSqliteConnection Create()
         {
             return _getConnection();
         }

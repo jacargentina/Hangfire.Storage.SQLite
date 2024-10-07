@@ -6,6 +6,7 @@ using System.Text;
 using Hangfire.States;
 using Hangfire.Storage.SQLite.Entities;
 using Newtonsoft.Json;
+using Microsoft.Data.Sqlite;
 
 namespace Hangfire.Storage.SQLite
 {
@@ -113,7 +114,8 @@ namespace Hangfire.Storage.SQLite
 
         public override void Commit()
         {
-            Retry.Twice((attempts) => {
+            Retry.Twice((attempts) =>
+            {
 
                 lock (_lockObject)
                 {
@@ -313,27 +315,27 @@ namespace Hangfire.Storage.SQLite
                 {
                     job.StateName = state.Name;
 
-                    try
+                    using (var tran = _.Database.BeginTransaction())
                     {
-                        _.Database.BeginTransaction();
-
-                        _.Database.Insert(new State
+                        try
                         {
-                            JobId = iJobId,
-                            Name = state.Name,
-                            Reason = state.Reason,
-                            CreatedAt = DateTime.UtcNow,
-                            Data = JsonConvert.SerializeObject(state.SerializeData())
-                        });
-                        _.Database.Update(job);
+                            _.Database.Insert(new State
+                            {
+                                JobId = iJobId,
+                                Name = state.Name,
+                                Reason = state.Reason,
+                                CreatedAt = DateTime.UtcNow,
+                                Data = JsonConvert.SerializeObject(state.SerializeData())
+                            });
+                            _.Database.Update(job);
 
-                        _.Database.Commit();
-                    }
-                    catch (Exception ex)
-                    {
-                        _.Database.Rollback();
-
-                        throw ex;
+                            tran.Commit();
+                        }
+                        catch
+                        {
+                            tran.Rollback();
+                            throw;
+                        }
                     }
                 }
             });

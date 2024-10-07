@@ -1,5 +1,4 @@
-﻿using Hangfire.Annotations;
-using Hangfire.Logging;
+﻿using Hangfire.Logging;
 using Hangfire.Server;
 using Hangfire.Storage.SQLite.Entities;
 using System;
@@ -65,7 +64,7 @@ namespace Hangfire.Storage.SQLite
         /// Run expiration manager to remove outdated records
         /// </summary>
         /// <param name="cancellationToken">Cancellation token</param>
-        public void Execute([NotNull] BackgroundProcessContext context)
+        public void Execute([Hangfire.Annotations.NotNull] BackgroundProcessContext context)
         {
             Execute(context.StoppingToken);
         }

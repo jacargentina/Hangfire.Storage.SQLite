@@ -1,8 +1,10 @@
 ﻿using Hangfire.Logging;
 using Hangfire.Storage.SQLite.Entities;
-using SQLite;
+using Microsoft.Data.Sqlite;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Text.Json;
 using System.Threading;
 
 namespace Hangfire.Storage.SQLite
@@ -28,7 +30,7 @@ namespace Hangfire.Storage.SQLite
         private string EventWaitHandleName => string.Intern($@"{GetType().FullName}.{_resource}");
 
         public event Action<bool> Heartbeat;
-        
+
         /// <summary>
         /// Creates SQLite distributed lock
         /// </summary>
@@ -101,7 +103,7 @@ namespace Hangfire.Storage.SQLite
 
                 return _dbContext.Database.Insert(distributedLock) == 1;
             }
-            catch (SQLiteException e) when (e.Result == SQLite3.Result.Constraint)
+            catch (SqliteException e) when (e.SqliteErrorCode == (int)SQLite3.Result.Constraint)
             {
                 return false;
             }
@@ -117,7 +119,7 @@ namespace Hangfire.Storage.SQLite
                     return;
                 }
 
-                var waitTime = (int) timeout.TotalMilliseconds / 10;
+                var waitTime = (int)timeout.TotalMilliseconds / 10;
                 // either wait for the event to be raised, or timeout
                 lock (EventWaitHandleName)
                 {
@@ -134,8 +136,8 @@ namespace Hangfire.Storage.SQLite
         /// <exception cref="DistributedLockTimeoutException"></exception>
         private void Release()
         {
-            Retry.Twice((retry) => {
-
+            Retry.Twice((retry) =>
+            {
                 // Remove resource lock (if it's still ours)
                 var count = _dbContext.DistributedLockRepository.Delete(_ => _.Resource == _resource && _.ResourceKey == _resourceKey);
                 if (count != 0)
@@ -150,7 +152,8 @@ namespace Hangfire.Storage.SQLite
         {
             try
             {
-                Retry.Twice((_) => {
+                Retry.Twice((_) =>
+                {
                     // Delete expired locks (of any owner)
                     _dbContext.DistributedLockRepository.
                         Delete(x => x.Resource == _resource && x.ExpireAt < DateTime.UtcNow);
@@ -205,13 +208,15 @@ namespace Hangfire.Storage.SQLite
             var table = tableQuery.Table.TableName;
 
             var command = tableQuery.Connection.CreateCommand($@"UPDATE ""{table}""
-                SET ""{expireColumn}"" = ?
-                WHERE ""{resourceColumn}"" = ?
-                AND ""{resourceKeyColumn}"" = ?",
-                expireAt,
-                _resource,
-                _resourceKey);
+                SET ""{expireColumn}"" = @val0
+                WHERE ""{resourceColumn}"" = @val1
+                AND ""{resourceKeyColumn}"" = @val2");
 
+            var ps = new Dictionary<string, object>();
+            ps.AddSanitizedValue(0, expireAt);
+            ps.AddSanitizedValue(1, _resource);
+            ps.AddSanitizedValue(2, _resourceKey);
+            command.AddParameters(ps);
             return command.ExecuteNonQuery() != 0;
         }
     }

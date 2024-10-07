@@ -1,7 +1,7 @@
 ﻿using Hangfire.Logging;
 using Hangfire.Storage.SQLite.Entities;
 using Newtonsoft.Json;
-using SQLite;
+using Microsoft.Data.Sqlite;
 using System;
 using System.Threading;
 
@@ -17,7 +17,7 @@ namespace Hangfire.Storage.SQLite
         /// <summary>
         /// 
         /// </summary>
-        public SQLiteConnection Database { get; private set; }
+        public HfSqliteConnection Database { get; private set; }
 
         /// <summary>
         /// 
@@ -36,7 +36,7 @@ namespace Hangfire.Storage.SQLite
         /// <param name="connection">the database path</param>
         /// <param name="logger"></param>
         /// <param name="prefix">Table prefix</param>
-        internal HangfireDbContext(SQLiteConnection connection, string prefix = "hangfire")
+        internal HangfireDbContext(HfSqliteConnection connection, string prefix = "hangfire")
         {
             Database = connection;
 
@@ -49,6 +49,8 @@ namespace Hangfire.Storage.SQLite
         public void Init(SQLiteStorageOptions storageOptions)
         {
             StorageOptions = storageOptions;
+
+            Database.Open();
 
             TryFewTimesDueToConcurrency(() => InitializePragmas(storageOptions));
             TryFewTimesDueToConcurrency(() => Database.CreateTable<AggregatedCounter>());
@@ -73,7 +75,7 @@ namespace Hangfire.Storage.SQLite
                         action();
                         return;
                     }
-                    catch (SQLiteException e) when (e.Result == SQLite3.Result.Locked)
+                    catch (SqliteException e) when (e.SqliteErrorCode == (int)SQLite3.Result.Locked)
                     {
                         // This can happen if too many connections are opened
                         // at the same time, trying to create tables
@@ -89,7 +91,7 @@ namespace Hangfire.Storage.SQLite
         {
             try
             {
-                Database.ExecuteScalar<string>($"PRAGMA journal_mode = {storageOptions.JournalMode}", Array.Empty<object>());
+                Database.ExecuteScalar<string>($"PRAGMA journal_mode = {storageOptions.JournalMode}");
             }
             catch (Exception ex)
             {
@@ -98,7 +100,7 @@ namespace Hangfire.Storage.SQLite
 
             try
             {
-                Database.ExecuteScalar<string>($"PRAGMA auto_vacuum = '{(int)storageOptions.AutoVacuumSelected}'", Array.Empty<object>());
+                Database.ExecuteScalar<string>($"PRAGMA auto_vacuum = '{(int)storageOptions.AutoVacuumSelected}'");
             }
             catch (Exception ex)
             {

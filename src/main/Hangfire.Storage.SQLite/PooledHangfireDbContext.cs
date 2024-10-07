@@ -1,5 +1,5 @@
 ﻿using System;
-using SQLite;
+using Microsoft.Data.Sqlite;
 
 namespace Hangfire.Storage.SQLite
 {
@@ -8,7 +8,7 @@ namespace Hangfire.Storage.SQLite
         private readonly Action<PooledHangfireDbContext> _onDispose;
         public bool PhaseOut { get; set; }
 
-        internal PooledHangfireDbContext(SQLiteConnection connection, Action<PooledHangfireDbContext> onDispose, string prefix = "hangfire") 
+        internal PooledHangfireDbContext(HfSqliteConnection connection, Action<PooledHangfireDbContext> onDispose, string prefix = "hangfire") 
             : base(connection, prefix)
         {
             _onDispose = onDispose ?? throw new ArgumentNullException(nameof(onDispose));

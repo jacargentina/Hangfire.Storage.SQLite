@@ -1,5 +1,5 @@
 ﻿using Hangfire.Server;
-using SQLite;
+using Microsoft.Data.Sqlite;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -54,11 +54,7 @@ namespace Hangfire.Storage.SQLite
         /// <param name="databasePath">SQLite connection string</param>
         /// <param name="storageOptions">Storage options</param>
         public SQLiteStorage(string databasePath, SQLiteStorageOptions storageOptions)
-            : this(new SQLiteDbConnectionFactory(() => new SQLiteConnection(
-                string.IsNullOrWhiteSpace(databasePath) ? throw new ArgumentNullException(nameof(databasePath)) : databasePath,
-                SQLiteOpenFlags.ReadWrite | SQLiteOpenFlags.Create | SQLiteOpenFlags.NoMutex,
-                storeDateTimeAsTicks: true
-            ) {BusyTimeout = TimeSpan.FromSeconds(10)}), storageOptions)
+            : this(new SQLiteDbConnectionFactory(() => new HfSqliteConnection(databasePath) { DefaultTimeout = 10 }), storageOptions)
         {
         }
 
@@ -77,7 +73,7 @@ namespace Hangfire.Storage.SQLite
 
             using (var dbContext = CreateAndOpenConnection())
             {
-                _databasePath = dbContext.Database.DatabasePath;
+                _databasePath = dbContext.Database.Database;
                 // Use this to initialize the database as soon as possible
                 // in case of error, the user will immediately get an exception at startup
             }

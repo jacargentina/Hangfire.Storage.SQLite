@@ -1,4 +1,4 @@
-﻿using SQLite;
+﻿using Microsoft.Data.Sqlite;
 using System;
 
 namespace Hangfire.Storage.SQLite.Entities

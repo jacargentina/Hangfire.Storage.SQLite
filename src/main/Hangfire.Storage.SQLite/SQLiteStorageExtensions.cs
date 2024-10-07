@@ -17,7 +17,7 @@ namespace Hangfire.Storage.SQLite
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
         public static IGlobalConfiguration<SQLiteStorage> UseSQLiteStorage(
-            [NotNull] this IGlobalConfiguration configuration)
+            [Hangfire.Annotations.NotNull] this IGlobalConfiguration configuration)
         {
             if (configuration == null) throw new ArgumentNullException(nameof(configuration));
             
@@ -35,8 +35,8 @@ namespace Hangfire.Storage.SQLite
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
         public static IGlobalConfiguration<SQLiteStorage> UseSQLiteStorage(
-            [NotNull] this IGlobalConfiguration configuration,
-            [NotNull] string nameOrConnectionString,
+            [Hangfire.Annotations.NotNull] this IGlobalConfiguration configuration,
+            [Hangfire.Annotations.NotNull] string nameOrConnectionString,
             SQLiteStorageOptions options = null)
         {
             if (configuration == null) throw new ArgumentNullException(nameof(configuration));
@@ -57,8 +57,8 @@ namespace Hangfire.Storage.SQLite
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
         public static IGlobalConfiguration<SQLiteStorage> UseSQLiteStorage(
-            [NotNull] this IGlobalConfiguration configuration,
-            [NotNull] SQLiteDbConnectionFactory connectionFactory,
+            [Hangfire.Annotations.NotNull] this IGlobalConfiguration configuration,
+            [Hangfire.Annotations.NotNull] SQLiteDbConnectionFactory connectionFactory,
             SQLiteStorageOptions options = null)
         {
             if (configuration == null) throw new ArgumentNullException(nameof(configuration));

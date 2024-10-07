@@ -3,6 +3,7 @@ using Hangfire.Storage.SQLite.Test.Utils;
 using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -84,7 +85,7 @@ namespace Hangfire.Storage.SQLite.Test
                 }
             });
         }
-        
+
         private Thread NewBackgroundThread(ThreadStart start)
         {
             return new Thread(start)
@@ -156,7 +157,7 @@ namespace Hangfire.Storage.SQLite.Test
             using var manualResetEvent = new ManualResetEventSlim();
             var success = new bool[numThreads];
             var storage = ConnectionUtils.CreateStorage();
-            
+
             // Spawn multiple threads to race each other.
             var threads = Enumerable.Range(0, numThreads).Select(i => NewBackgroundThread(() =>
             {
@@ -244,7 +245,7 @@ namespace Hangfire.Storage.SQLite.Test
                 }
             });
         }
-        
+
         [Fact]
         public async Task Heartbeat_Fires_WithSuccess()
         {
@@ -260,7 +261,7 @@ namespace Hangfire.Storage.SQLite.Test
                 Assert.True(result);
             });
         }
-        
+
         [Fact]
         public void Heartbeat_Fires_With_Fail_If_Lock_No_Longer_Exists()
         {
@@ -305,13 +306,13 @@ namespace Hangfire.Storage.SQLite.Test
                 slock.Heartbeat -= onHeartbeat;
             }
         }
-        
+
         private static void UseConnection(Action<HangfireDbContext> action, SQLiteStorage storage = null)
         {
             using var connection = storage?.CreateAndOpenConnection() ?? ConnectionUtils.CreateConnection();
             action(connection);
         }
-        
+
         private static async Task UseConnectionAsync(Func<HangfireDbContext, Task> func, SQLiteStorage storage = null)
         {
             using var connection = storage?.CreateAndOpenConnection() ?? ConnectionUtils.CreateConnection();

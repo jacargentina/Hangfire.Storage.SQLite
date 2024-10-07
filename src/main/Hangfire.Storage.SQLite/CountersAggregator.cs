@@ -1,5 +1,4 @@
-﻿using Hangfire.Annotations;
-using Hangfire.Logging;
+﻿using Hangfire.Logging;
 using Hangfire.Server;
 using System;
 using System.Linq;
@@ -38,7 +37,7 @@ namespace Hangfire.Storage.SQLite
         /// Runs aggregator
         /// </summary>
         /// <param name="context">Background processing context</param>
-        public void Execute([NotNull] BackgroundProcessContext context)
+        public void Execute([Hangfire.Annotations.NotNull] BackgroundProcessContext context)
         {
             Execute(context.StoppingToken);
         }
