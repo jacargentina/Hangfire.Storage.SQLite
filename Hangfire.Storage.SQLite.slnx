@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".circleci/config.yml" />
+    <File Path=".github/workflows/dotnetcore.yml" />
+    <File Path=".travis.yml" />
+  </Folder>
+  <Project Path="src/main/Hangfire.Storage.SQLite/Hangfire.Storage.SQLite.csproj" />
+  <Project Path="src/samples/ConsoleSample/ConsoleSample.csproj" />
+  <Project Path="src/samples/WebSample/WebSample.csproj" />
+  <Project Path="src/test/Hangfire.Storage.SQLite.Test/Hangfire.Storage.SQLite.Test.csproj" />
+</Solution>
